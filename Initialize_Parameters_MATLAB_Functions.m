@@ -17,10 +17,10 @@ nu = 1/6.3;         %
 
 % Simplifying the A matrix (no load) here.
 a = R/L;
-b = K_e*nu/L;
+b = K_e/(nu*L);
 c = V/L;
-d = (K_t*nu)/( (J_L/E) + J_m*nu^2 );
-e = (K_d*nu^2)/( (J_L/E) + J_m*nu^2 );
+d = (K_t*nu)/( (J_L*(nu^2))/E + J_m);
+e = (K_d)/( (J_L*(nu^2))/E + J_m);
 
 
 %For Calculating state space model A,B,C,D
@@ -35,8 +35,8 @@ B = [c
 
 %% Make a separate A matrix for Load analysis
 J_L = 1319858.29e-9; % Moment of Inertia of Load/Truss
-d_l = (K_t*nu)/( (J_L/E) + J_m*nu^2 );
-e_l = (K_d*nu^2)/( (J_L/E) + J_m*nu^2 );
+d_l = (K_t*nu)/( (J_L*(nu^2))/E + J_m);
+e_l = (K_d)/( (J_L*(nu^2))/E + J_m);
 A_L = [-a 0 -b;
      0 0 1;
      d_l 0 -e_l];
