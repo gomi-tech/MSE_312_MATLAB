@@ -38,8 +38,8 @@ J_L = 6319858.29e-9; % Moment of Inertia of Load/Truss
 d_l = (K_t*nu)/( (J_L*(nu^2))/E + J_m);
 e_l = (K_d)/( (J_L*(nu^2))/E + J_m);
 A_L = [-a 0 -b;
-     0 0 1;
-     d_l 0 -e_l];
+        0 0 1;
+      d_l 0 -e_l];
  
 %Form of the state space vector is [current ,position, velocity]
 %Therefore to analyze position and velocity response of the system
@@ -56,11 +56,12 @@ sysmodel_vel_L = ss(A_L,B,C_vel,D);
 sysmodel_pos_L = ss(A_L,B,C_pos,D);
 
 
-%Find the transfer function of the system using tf.
-sys_vel = tf(sysmodel_vel);
-sys_pos = tf(sysmodel_pos);
-sys_vel_L = tf(sysmodel_vel_L);
-sys_pos_L = tf(sysmodel_pos_L);
+%Find the transfer function of the system using tf for both load and non
+%load conditions
+sys_vel = tf(sysmodel_vel)
+sys_pos = tf(sysmodel_pos)
+sys_vel_L = tf(sysmodel_vel_L)
+sys_pos_L = tf(sysmodel_pos_L)
 
 %%
 %1111111111111111111111111111111111111111111111111111111111
@@ -70,86 +71,52 @@ sys_pos_L = tf(sysmodel_pos_L);
 
 %------------------------------------------
 %    GAIN ANANLYSIS - Position no Load    %
-%------------------------------------------
-G_pos = sys_pos;
-k1 = 0.1;
-k2 = 1;
-k3 = 10;
-T1 = feedback(G_pos*k1,1);
-T2 = feedback(G_pos*k2,1);
-T3 = feedback(G_pos*k3,1);
+%-----------------------------------------
 
-figure(2);
-subplot(2,1,1);
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('k = 0.1','k = 1','k = 10');
-title('Position-Gain Analysis no load');
-ylabel('postition (rads)');
-hold on
+plant = sys_pos;
 
+kp = 1;
+kd = 0;
+ki = 0;
+figure(1)
+plot_response_kp(plant,kp,kd,ki)
+title('[P] Position Analysis no load');
 
 %------------------------------------------
 %    GAIN ANANLYSIS - Position w/ Load    %
 %------------------------------------------
-G_pos_L = sys_pos_L;
-k1 = 0.1;
-k2 = 1;
-k3 = 10;
-T1 = feedback(G_pos_L*k1,1);
-T2 = feedback(G_pos_L*k2,1);
-T3 = feedback(G_pos_L*k3,1);
 
-subplot(2,1,2); 
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('k = 0.1','k = 1','k = 10');
-title('Position-Gain Analysis w/ load');
-ylabel('postition (rads)');
-hold off
+plant = sys_pos_L;
+kp = 1;
+kd = 0;
+ki = 0;
+figure(2)
+plot_response_kp(plant,kp,kd,ki)
+title('[P] Position Analysis w/ load');
 
 %-----------------------------------------
 %    GAIN ANANLYSIS - Velocity no Load    %
 %-----------------------------------------
 
-G_vel = sys_vel;
-k1 = 0.1;
-k2 = 1;
-k3 = 10;
-T1 = feedback(G_vel*k1,1);
-T2 = feedback(G_vel*k2,1);
-T3 = feedback(G_vel*k3,1);
-
-figure(3);
-subplot(2,1,1);
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('k = 0.1','k = 1','k = 10');
-title('Velocity-Gain Analysis no load');
-ylabel('Veloctiy (rad/s)');
-hold on
+plant = sys_vel;
+kp = 1;
+kd = 0;
+ki = 0;
+figure(3)
+plot_response_kp(plant,kp,kd,ki)
+title('[P] Velocity Analysis w/ load');
 
 %-----------------------------------------
 %    GAIN ANANLYSIS - Velocity w/ Load    %
 %-----------------------------------------
 
-G_vel_L = sys_vel_L;
-k1 = 0.1;
-k2 = 1;
-k3 = 10;
-T1 = feedback(G_vel_L*k1,1);
-T2 = feedback(G_vel_L*k2,1);
-T3 = feedback(G_vel_L*k3,1);
-
-
-subplot(2,1,2); 
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('k = 0.1','k = 1','k = 10');
-title('Velocity-Gain Analysis w/ load');
-ylabel('Veloctiy (rad/s)');
-hold off
-
+plant = sys_vel_L;
+kp = 1;
+kd = 0;
+ki = 0;
+figure(4)
+plot_response_kp(plant,kp,kd,ki)
+title('[P] Velocity Analysis w/ load');
 
 %%
 %22222222222222222222222222222222222222222222222222222222222222222
@@ -161,97 +128,232 @@ hold off
 %    PI ANANLYSIS - Position no Load    %
 %---------------------------------------
 
-G_pos = sys_pos;
-s = tf('s');
-
-k2 = 1;
-ki1 = 0.1;
-ki2 = 0.5;
-ki3 = 1;
-T1 = feedback(G_pos*(k2+(ki1/s)),1);
-T2 = feedback(G_pos*(k2+(ki2/s)),1);
-T3 = feedback(G_pos*(k2+(ki3/s)),1);
-
-figure(4);
-subplot(2,1,1);
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('ki = 0.1','ki = 0.5','ki = 1');
-title('Position-PI Analysis no load (Kp = 1)');
-ylabel('postition (rads)');
-hold on
-
+plant = sys_pos;
+kp = 1;
+kd = 0;
+ki = 1;
+figure(5)
+plot_response_ki(plant,kp,kd,ki)
+title('[PI] Position Analysis no load (Kp = 1)');
 
 %------------------------------------------
 %    PI ANANLYSIS - Position w/ Load      %
 %------------------------------------------
-G_pos_L = sys_pos_L;
-s = tf('s');
 
-k2 = 1;
-ki1 = 0.1;
-ki2 = 0.5;
-ki3 = 1;
-T1 = feedback(G_pos_L*(k2+(ki1/s)),1);
-T2 = feedback(G_pos_L*(k2+(ki2/s)),1);
-T3 = feedback(G_pos_L*(k2+(ki3/s)),1);
-
-subplot(2,1,2); 
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('ki = 0.1','ki = 0.5','ki = 1');
-title('Position-PI Analysis w/ load (Kp = 1)');
-ylabel('postition (rads)');
-hold off
+plant = sys_pos_L;
+kp = 1;
+kd = 0;
+ki = 1;
+figure(6)
+plot_response_ki(plant,kp,kd,ki)
+title('[PI] Position Analysis w/ load (Kp = 1)');
 
 %-----------------------------------------
 %   PI ANANLYSIS - Velocity no Load      %
 %-----------------------------------------
 
-G_vel = sys_vel;
-s = tf('s');
-
-k2 = 1;
-ki1 = 0.1;
-ki2 = 0.5;
-ki3 = 1;
-T1 = feedback(G_pos_L*(k2+(ki1/s)),1);
-T2 = feedback(G_pos_L*(k2+(ki2/s)),1);
-T3 = feedback(G_pos_L*(k2+(ki3/s)),1);
-
-figure(5);
-subplot(2,1,1);
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('ki = 0.1','ki = 0.5','ki = 1');
-title('Velocity-PI Analysis no load (Kp = 1)');
-ylabel('Veloctiy (rad/s)');
-hold on
+plant = sys_vel;
+kp = 1;
+kd = 0;
+ki = 1;
+figure(7)
+plot_response_ki(plant,kp,kd,ki)
+title('[PI] Velocity Analysis no load (Kp = 1)');
 
 %-----------------------------------------
-%    PI ANANLYSIS - Velocity w/ Load      %
+%   PI ANANLYSIS - Velocity w/ Load      %
 %-----------------------------------------
 
-G_vel_L = sys_vel_L;
-s = tf('s');
-
-k2 = 1;
-ki1 = 0.1;
-ki2 = 0.5;
-ki3 = 1;
-T1 = feedback(G_pos_L*(k2+(ki1/s)),1);
-T2 = feedback(G_pos_L*(k2+(ki2/s)),1);
-T3 = feedback(G_pos_L*(k2+(ki3/s)),1);
+plant = sys_vel_L;
+kp = 1;
+kd = 0;
+ki = 1;
+figure(8)
+plot_response_ki(plant,kp,kd,ki)
+title('[PI] Velocity Analysis w/ load (Kp = 1)');
 
 
-subplot(2,1,2); 
-opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
-step(T1,'b',T2,'r',T3,'g',opt);
-legend('ki = 0.1','ki = 0.5','ki = 1');
-title('Velocity-PI Analysis w/ load (Kp = 1)');
-ylabel('Veloctiy (rad/s)');
-hold off
+% G_pos = sys_pos;
+% k1 = 0.1;
+% k2 = 1;
+% k3 = 10;
+% T1 = feedback(G_pos*k1,1);
+% T2 = feedback(G_pos*k2,1);
+% T3 = feedback(G_pos*k3,1);
+% 
+% figure(2);
+% subplot(2,1,1);
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('k = 0.1','k = 1','k = 10');
+% title('Position-Gain Analysis no load');
+% ylabel('postition (rads)');
+% hold on
 
+
+%------------------------------------------
+%    GAIN ANANLYSIS - Position w/ Load    %
+%------------------------------------------
+% G_pos_L = sys_pos_L;
+% k1 = 0.1;
+% k2 = 1;
+% k3 = 10;
+% T1 = feedback(G_pos_L*k1,1);
+% T2 = feedback(G_pos_L*k2,1);
+% T3 = feedback(G_pos_L*k3,1);
+% 
+% subplot(2,1,2); 
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('k = 0.1','k = 1','k = 10');
+% title('Position-Gain Analysis w/ load');
+% ylabel('postition (rads)');
+% hold off
+
+%-----------------------------------------
+%    GAIN ANANLYSIS - Velocity no Load    %
+%-----------------------------------------
+
+% G_vel = sys_vel;
+% k1 = 0.1;
+% k2 = 1;
+% k3 = 10;
+% T1 = feedback(G_vel*k1,1);
+% T2 = feedback(G_vel*k2,1);
+% T3 = feedback(G_vel*k3,1);
+% 
+% figure(3);
+% subplot(2,1,1);
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('k = 0.1','k = 1','k = 10');
+% title('Velocity-Gain Analysis no load');
+% ylabel('Veloctiy (rad/s)');
+% hold on
+
+%-----------------------------------------
+%    GAIN ANANLYSIS - Velocity w/ Load    %
+%-----------------------------------------
+
+% G_vel_L = sys_vel_L;
+% k1 = 0.1;
+% k2 = 1;
+% k3 = 10;
+% T1 = feedback(G_vel_L*k1,1);
+% T2 = feedback(G_vel_L*k2,1);
+% T3 = feedback(G_vel_L*k3,1);
+% 
+% 
+% subplot(2,1,2); 
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('k = 0.1','k = 1','k = 10');
+% title('Velocity-Gain Analysis w/ load');
+% ylabel('Veloctiy (rad/s)');
+% hold off
+
+
+% %%
+% %22222222222222222222222222222222222222222222222222222222222222222
+% %         PROPORTIONAL/INTEGRAL ANALYSIS                         %
+% %                                                                %
+% %22222222222222222222222222222222222222222222222222222222222222222
+% 
+% %----------------------------------------
+% %    PI ANANLYSIS - Position no Load    %
+% %---------------------------------------
+% 
+% G_pos = sys_pos;
+% s = tf('s');
+% 
+% k2 = 1;
+% ki1 = 0.1;
+% ki2 = 0.5;
+% ki3 = 1;
+% T1 = feedback(G_pos*(k2+(ki1/s)),1);
+% T2 = feedback(G_pos*(k2+(ki2/s)),1);
+% T3 = feedback(G_pos*(k2+(ki3/s)),1);
+% 
+% figure(4);
+% subplot(2,1,1);
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('ki = 0.1','ki = 0.5','ki = 1');
+% title('Position-PI Analysis no load (Kp = 1)');
+% ylabel('postition (rads)');
+% hold on
+% 
+% 
+% %------------------------------------------
+% %    PI ANANLYSIS - Position w/ Load      %
+% %------------------------------------------
+% G_pos_L = sys_pos_L;
+% s = tf('s');
+% 
+% k2 = 1;
+% ki1 = 0.1;
+% ki2 = 0.5;
+% ki3 = 1;
+% T1 = feedback(G_pos_L*(k2+(ki1/s)),1);
+% T2 = feedback(G_pos_L*(k2+(ki2/s)),1);
+% T3 = feedback(G_pos_L*(k2+(ki3/s)),1);
+% 
+% subplot(2,1,2); 
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('ki = 0.1','ki = 0.5','ki = 1');
+% title('Position-PI Analysis w/ load (Kp = 1)');
+% ylabel('postition (rads)');
+% hold off
+
+% %-----------------------------------------
+% %   PI ANANLYSIS - Velocity no Load      %
+% %-----------------------------------------
+% 
+% G_vel = sys_vel;
+% s = tf('s');
+% 
+% k2 = 1;
+% ki1 = 0.1;
+% ki2 = 0.5;
+% ki3 = 1;
+% T1 = feedback(G_vel*(k2+(ki1/s)),1);
+% T2 = feedback(G_vel*(k2+(ki2/s)),1);
+% T3 = feedback(G_vel*(k2+(ki3/s)),1);
+% 
+% figure(5);
+% subplot(2,1,1);
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('ki = 0.1','ki = 0.5','ki = 1');
+% title('Velocity-PI Analysis no load (Kp = 1)');
+% ylabel('Veloctiy (rad/s)');
+% hold on
+% 
+% %-----------------------------------------
+% %    PI ANANLYSIS - Velocity w/ Load      %
+% %-----------------------------------------
+% 
+% G_vel_L = sys_vel_L;
+% s = tf('s');
+% 
+% k2 = 1;
+% ki1 = 0.1;
+% ki2 = 0.5;
+% ki3 = 1;
+% T1 = feedback(G_vel_L*(k2+(ki1/s)),1);
+% T2 = feedback(G_vel_L*(k2+(ki2/s)),1);
+% T3 = feedback(G_vel_L*(k2+(ki3/s)),1);
+% 
+% 
+% subplot(2,1,2); 
+% opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
+% step(T1,'b',T2,'r',T3,'g',opt);
+% legend('ki1 = 0.1','ki2 = 0.5','ki3 = 1');
+% title('Velocity-PI Analysis w/ load (Kp = 1)');
+% ylabel('Veloctiy (rad/s)');
+% hold off
+% 
 
 %%
 %333333333333333333333333333333333333333333333333333333333333333333333333
@@ -278,7 +380,7 @@ figure(6);
 subplot(2,1,1);
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.1','kd = 1','kd = 5');
+legend('kd1 = 0.1','kd2 = 1','kd3 = 5');
 title('Position-PD Analysis no load (Kp = 1)');
 ylabel('postition (rads)');
 hold on
@@ -294,14 +396,14 @@ k2 = 1;
 kd1 = 0.1;
 kd2 = 1;
 kd3 = 5;
-T1 = feedback(G_pos*(k2+(kd1*s)),1);
-T2 = feedback(G_pos*(k2+(kd2*s)),1);
-T3 = feedback(G_pos*(k2+(kd3*s)),1);
+T1 = feedback(G_pos_L*(k2+(kd1*s)),1);
+T2 = feedback(G_pos_L*(k2+(kd2*s)),1);
+T3 = feedback(G_pos_L*(k2+(kd3*s)),1);
 
 subplot(2,1,2); 
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.1','kd = 1','kd = 5');
+legend('kd1 = 0.1','kd2 = 1','kd3 = 5');
 title('Position-PD Analysis w/ load (Kp = 1)');
 ylabel('postition (rads)');
 hold off
@@ -317,16 +419,16 @@ k2 = 1;
 kd1 = 0.1;
 kd2 = 1;
 kd3 = 5;
-T1 = feedback(G_pos*(k2+(kd1*s)),1);
-T2 = feedback(G_pos*(k2+(kd2*s)),1);
-T3 = feedback(G_pos*(k2+(kd3*s)),1);
+T1 = feedback(G_vel*(k2+(kd1*s)),1);
+T2 = feedback(G_vel*(k2+(kd2*s)),1);
+T3 = feedback(G_vel*(k2+(kd3*s)),1);
 
 
 figure(7);
 subplot(2,1,1);
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.1','kd = 1','kd = 5');
+legend('kd1 = 0.1','kd2 = 1','kd3 = 5');
 title('Velocity-PD Analysis no load (Kp = 1)');
 ylabel('Veloctiy (rad/s)');
 hold on
@@ -342,15 +444,15 @@ k2 = 1;
 kd1 = 0.1;
 kd2 = 1;
 kd3 = 5;
-T1 = feedback(G_pos*(k2+(kd1*s)),1);
-T2 = feedback(G_pos*(k2+(kd2*s)),1);
-T3 = feedback(G_pos*(k2+(kd3*s)),1);
+T1 = feedback(G_vel_L*(k2+(kd1*s)),1);
+T2 = feedback(G_vel_L*(k2+(kd2*s)),1);
+T3 = feedback(G_vel_L*(k2+(kd3*s)),1);
 
 
 subplot(2,1,2); 
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.1','kd = 1','kd = 5');
+legend('kd1 = 0.1','kd2 = 1','kd3 = 5');
 title('Velocity-PD Analysis w/ load (Kp = 1)');
 ylabel('Veloctiy (rad/s)');
 hold off
@@ -381,7 +483,7 @@ figure(8);
 subplot(2,1,1);
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.05','kd = 0.1','kd = 0.001');
+legend('kd1 = 0.05','kd2 = 0.1','kd3 = 0.001');
 title('Position-PID Analysis no load (Kp = 5, Ki = 0.5)');
 ylabel('postition (rads)');
 hold on
@@ -398,15 +500,15 @@ ki1 = 0.5;
 kd1 = 0.1;
 kd2 = 0.5;
 kd3 = 1;
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd1*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd2*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd3*s)),1);
+T1 = feedback(G_pos_L*(k2+(ki1/s)+(kd1*s)),1);
+T1 = feedback(G_pos_L*(k2+(ki1/s)+(kd2*s)),1);
+T1 = feedback(G_pos_L*(k2+(ki1/s)+(kd3*s)),1);
 
 
 subplot(2,1,2); 
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.5','kd = 0.1','kd = 1');
+legend('kd1 = 0.5','kd2 = 0.1','kd3 = 1');
 title('Position-PID Analysis no load (Kp = 5, Ki = 0.5)');
 ylabel('Postition (rads)');
 hold off
@@ -423,15 +525,15 @@ ki1 = 0.5;
 kd1 = 0.1;
 kd2 = 0.5;
 kd3 = 1;
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd1*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd2*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd3*s)),1);
+T1 = feedback(G_vel*(k2+(ki1/s)+(kd1*s)),1);
+T1 = feedback(G_vel*(k2+(ki1/s)+(kd2*s)),1);
+T1 = feedback(G_vel*(k2+(ki1/s)+(kd3*s)),1);
 
 figure(9);
 subplot(2,1,1);
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.5','kd = 0.1','kd = 1');
+legend('kd1 = 0.5','kd2 = 0.1','kd3 = 1');
 title('Position-PID Analysis no load (Kp = 5, Ki = 0.5)');
 ylabel('Veloctiy (rad/s)');
 hold on
@@ -448,15 +550,15 @@ ki1 = 0.5;
 kd1 = 0.1;
 kd2 = 0.5;
 kd3 = 1;
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd1*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd2*s)),1);
-T1 = feedback(G_pos*(k2+(ki1/s)+(kd3*s)),1);
+T1 = feedback(G_vel_L*(k2+(ki1/s)+(kd1*s)),1);
+T1 = feedback(G_vel_L*(k2+(ki1/s)+(kd2*s)),1);
+T1 = feedback(G_vel_L*(k2+(ki1/s)+(kd3*s)),1);
 
 
 subplot(2,1,2); 
 opt = stepDataOptions('InputOffset',0,'StepAmplitude',3.14159/2);
 step(T1,'b',T2,'r',T3,'g',opt,1);
-legend('kd = 0.5','kd = 0.1','kd = 1');
+legend('kd1 = 0.5','kd2 = 0.1','kd3 = 1');
 title('Position-PID Analysis no load (Kp = 5, Ki = 0.5)');
 ylabel('Veloctiy (rad/s)');
 hold off
